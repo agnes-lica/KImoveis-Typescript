@@ -1,114 +1,192 @@
-# S5-19 | 🏁 Entrega: KImóveis - TypeORM com Relacionamentos
 
-Para inciar este projeto, é necessário instalar as dependências, que serão utilizadas nos testes. Portanto utilize o comando abaixo para instalar tais dependências:
+# KImóveis
 
-````
-yarn install
-````
+Projeto de um serviço de back end responsável por gerenciar uma imobiliária. 
 
 
-**Atenção:** é necessário utilizar o `yarn` pois esse projeto foi iniciado com esse gerenciador de pacotes.
-
-Para verificar se já possui o gerenciador yarn instalado utilize o seguinte comando:
-
-````
-yarn --version
-````
-
-Caso não possua o yarn instalado, utilize o comando abaixo para instalar globalmente na sua máquina:
-
-````
-npm install --global yarn
-````
-<br>
 
 
-Essa entrega já está com o Docker configurado, basta preencher as variáveis de ambiente no .env
+## Stack utilizada
 
-Basta buildar e subir nossos containers usando o comando padrão:
-````
-docker-compose up --build
-````
+Para o estudo foram escolhidas as tecnologias:
 
+**Back-end:** JavaScript, Express, Node, TypeORM.
+
+**Testes:** Jest.
+
+**Ambiente:** Docker.
+## Rodando localmente
+
+Clone o projeto
+
+```bash
+  git clone git@github.com:agnes-lica/KImoveis-Typescript.git
+```
+
+Entre no diretório do projeto
+
+```bash
+  cd KImoveis
+```
+
+Instale as dependências
+
+```bash
+  yarn install
+```
+
+Inicie o servidor
+
+```bash
+  docker-compose up --build
+```
 ou
-````
-docker compose up --build
-````
-O comando pode variar com a versão do docker compose instalada em sua máquina
 
-***ATENÇÃO:*** a porta utilizada para rodar nosso docker é a `5431`.
-Caso tenha algum problema com essa porta, basta alterá-la no docker-compose.yml.
+```bash
+  docker compose up --build
+```
 
-<br>
+## Rodando os testes
 
-# **Sobre os testes**
+#### Rodar todos os testes
+```bash
+ yarn test
+```
 
-Essa aplicação possui testes, que serão utilizados para validar, se todas as regras de negócio foram aplicadas de maneira correta.
+#### Rodar todos os testes e ter um log ainda mais completo
+```bash
+ yarn test --all
+```
 
-Os testes estão localizados em `src/__tests__`.
+#### Rodar os testes de uma pasta específica
+```bash 
+ yarn test ./scr/__tests__/integration/<subpasta>
+```
 
-Na subpasta `integration` estão os testes.
+#### Rodar os testes de um arquivo específico
+```bash 
+ yarn test ./scr/__tests__/integration/<subpasta>/<arquivo>
+```
 
-Já na subpasta `mocks` estão os dados que serão utilizados para os testes.
+#### Rodar um teste específico
+```bash
+ yarn test -t "/nomeDoTeste"
+```
 
-No arquivo `jest.config.json` estão algumas configurações necessárias para os testes rodarem.
+## Documentação da API
 
-**`De modo algum altere qualquer um desses arquivos.`** Isso poderá comprometer a integridade dos testes.
+#### Endpoints
 
-E também não altere o script de `test` localizado no `package.json`. Isso será utilizado para rodar os testes.
+| Método   | Endpoint       | Descrição                                   |
+| :---------- | :--------- | :------------------------------------------ |
+| `POST`      | `/users` | Criação de usuário|
+| `GET`      | `/users` | Lista todos os usuários |
+| `PATCH`      | `/users/:id` | Atualiza um usuário |
+| `DELETE`      | `/users/:id` | Realiza um soft delete no usuário |
+| `POST`      | `/login` | Gera o token de autenticação |
+| `POST`      | `/categoria` | Criação de categoria |
+| `GET`      | `/categoria` | Lista todas as categorias |
+| `GET`      | `/categoria/:id/realEstate` | Lista todos imóveis que pertencem a uma categoria |
+| `POST`      | `/realEstate` | Criação de um imóvel |
+| `GET`      | `/realEstate` | 	Lista todos os imóveis |
+| `POST`      | `/schedules` | Agenda uma visita a um imóvel |
+| `GET`      | `/schedules/realEstate/:id` | lista todos os agendamentos de um imóvel |
 
-<br>
+#### Requisito dos Serviços
 
+*POST* - **/users**
 
-# **Rodando os testes** 
+* Rota para criação de usuário com os seguintes dados:
 
-Para rodar os testes é necessário que no seu terminal, você esteja dentro do diretório do projeto.
+    * **id**: Valor SERIAL. Gerado de forma automática pelo typeORM.
+    * **name**: string e obrigatório
+    * **email**: string, obrigatório e único.
+    * **password**:Recebe uma string e armazena uma hash gerada com o bcryptjs
+    * **admin**: boolean e false por padrão
+    * **createdAt**: Gerado pelo typeORM.
+    * **updatedAt**: Gerado pelo typeORM.
+    * **deletedAt**: Gerado pelo typeORM.
+* A rota de criação deve retorna todos os dados, com exceção da hash de senha.
+* Não podem ser cadastrados dois usuário com o mesmo e-mail.
 
-Estando no terminal e dentro do caminho correto, você poderá utilizar os comandos a seguir:
+*GET* - **/users**
+* A rota retorna todos os dados dos usuários, com exceção da hash de senha.
+* A rota pode ser acessada apenas por usuários administradores (admin = true).
 
-### Rodar todos os testes
-````
-yarn test
-````
-#
-### Rodar todos os testes e ter um log ainda mais completo
-````
-yarn test --all
-````
-#
+*PATCH* - **/users/:id**
+* A rota atualizar os dados do usuário.
+* Não é possível atualizar os campos id e admin.
+* Apenas administradores podem atualizar qualquer usuário, usuários não-administradores podem apenas atualizar seu próprio usuário.
 
-### Rodar os testes de uma pasta específica
-`detalhe: repare que tests está envolvido por 2 underlines. Isso se chama dunder.`
-````
-yarn test ./scr/__tests__/integration/<subpasta>
-````
-#
-### Rodar os testes de um arquivo específico
-````
-yarn test ./scr/__tests__/integration/<subpasta>/<arquivo>
-````
-#
-### Rodar um teste específico
-````
-yarn test -t <describe ou test específico envolto em aspas>
-````
-````
-\\ ex: yarn test -t "/categories"
-\\ rodaria os testes do describe "/categorias" no caminho
-\\ ./scr/__tests__/integration/categories/categoriesRoutes.test.ts
-````
+*DELETE* - **/users/:id**
+* A rota realizar um soft delete do usuário.
+* A rota pode ser acessada apenas por administradores.
+* Não é possível realizar um soft delete em um usuário já deletado.
 
-<br>
+*POST* - **/login**
+* Rota de login recebe email e password
+* O login valida se o usuário existe e se a senha está correta.
+* Não é possível realizar o login de um usuário deletado.
 
+*POST* - **/categories**
+* Rota para criação de categorias com os seguintes dados:
+    * id: Valor SERIAL. Gerado de forma automática pelo typeORM.
+    * name: string e obrigatório
+* Não podem ser cadastradas duas categorias com o mesmo nome.
+* A rota pode ser acessada apenas por usuários administradores (admin = true).
 
-**Caso você queira verificar todas as opções de execução de testes, visite a [Documentação oficial do Jest](https://jestjs.io/docs/cli)**
+*GET* - **/categories**
+* Rota lista todas as categorias.
+* A rota não precisa de autenticação para ser acessada.
 
-Após rodar um dos comandos aparecerá um log no seu terminal, contendo as informações da execução do teste.
+*GET* - **/categories/:id/realEstate**
+* Rota lista todos os imóveis que pertencem a uma categoria.
+* A rota não precisa de autenticação para ser acessada.
 
-**Observação:** O teste pode demorar alguns segundos para ser finalizado. Quanto maior for o teste, mais tempo será consumido para a execução.
+*POST* - **/realEstate**
+* Rota para criação de um imóvel com os seguintes dados:
+    * id: Valor SERIAL. Gerado de forma automática pelo typeORM.
+    * value: decimal e obrigatório
+    * size: inteiro e obrigatório
+    * address: um objeto com os seguintes dados:
+        * street: string e obrigatório
+        * zipCode: string e obrigatório
+        * number: string e opcional
+        * city: string e obrigatório
+        * state: string e obrigatório
+        * categoryId: number
+    * sold: Gerado no momento da validação dos dados no formato boolean com default = false.
+    * createdAt: Gerado pelo typeORM.
+    * updatedAt: Gerado pelo typeORM.
+    * Não podem ser cadastrados dois imóveis com o mesmo endereço.
+* A rota pode ser acessada apenas por administradores.
+* Não podem ser cadastrados imóveis com o campo state maior que 2 dígitos.
+* Não podem ser cadastrados imóveis com o campo zipCode maior que 8 dígitos.
 
-#
+*GET* - **/realEstate**
+* Rota lista todos os imóveis.
+* A rota não precisa de autenticação para ser acessada.
 
+*POST* - **/schedules**
+* Rota responsável pelo agendamento de uma visita a um imóvel com os seguintes dados:
+    * id: Valor SERIAL. Gerado de forma automática pelo typeORM.
+    * date: string da data de agendamento da visita ao imóvel, no formato AAAA-DD-MM
+    * hour: string do horário de agendamento da visita ao imóvel, no formato HH:MM
+    * realEstateId: inteiro
+    * userId: Pego através do token do usuário.
+* Não é possível agendar uma visita a um imóvel com a mesma data e hora.
+* Não é possível um usuário agendar uma visita a 2 imóveis diferentes com a mesma data e hora.
+* Só é possível agendar uma visita durante horário comercial (08:00 as 18:00).
+* Só é possível agendar uma visita durante em dias úteis (segunda à sexta).
 
+*GET* - **/schedules/realEstate/:id**
+* Rota lista todos os agendamentos de um imóvel.
+* A rota pode ser acessada apenas por administradores.
 
-### Agora que já sabe como iniciar o seu projeto e rodar os testes, é hora de colocar a mão no código!
+## Contato
+
+Para entrar em contato comigo me mande um e-mail ou uma mensagem nas redes sociais:
+
+- [github](https://www.github.com/agnes-lica)
+- [LinkedIn](https://www.linkedin.com/in/agnesmr/)
+- E-mail: agnes.lica@gmail.com
